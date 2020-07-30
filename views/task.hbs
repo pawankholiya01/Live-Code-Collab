@@ -1,0 +1,214 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/codemirror.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/mode/clike/clike.min.js"></script>
+
+
+<script src="../plugin/ot/ot.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<link href = "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.css" rel='stylesheet'/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/theme/monokai.min.css" rel='stylesheet' />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/theme/abcdef.min.css" rel='stylesheet' />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/theme/material-palenight.min.css" rel='stylesheet' />
+
+
+<div class = "container-fluid">
+    {{!-- <div id="name"   >{{user.name}}</div> --}}
+    <div class="row high">
+        <div class="col-md-8">
+            <textarea id="code-screen">{{content}}</textarea>
+        </div>
+        <div class="col-md-4" id="chatbox">
+
+            <div class="panel panel-primary ">
+                
+                {{!-- <div id="video-container">
+                    <video autoplay id="second-video"></video>
+                    <video autoplay id="my-video" muted="true"></video>
+                    <div id="step2">
+                        <p>Your ID: <span id="my-id">...</span></p>
+                        <div class="form-inline">
+                            <input type="text" class="form-control" placeholder="Cal User Id ..." id="callto-id">
+                            <a href="" class="btn btn-sm btn-success" id="make-call">Call</a>
+                        </div>
+                    </div>
+
+                    <div id="step3">
+                        <p>Talk To <span id="second-id">...</span>
+                            <a href="#" id="end-call" class="btn btn-sm btn-danger">End Call</a>
+                        </p>
+                    </div>
+                </div> --}}
+
+
+
+                <div class="panel-heading row ">
+                    <div class = "col-md-4">
+                    CHAT 
+                    </div>
+                    <div class="pull-right col-md-8 justify-content-right" id="chatbox-username">
+                        <span class= " right mr-1">
+                        {{#if user}}
+                        {{user.name}}
+                        {{/if}}
+                        </span>
+                       
+                    </div>
+                </div>
+                <div class="panel-body chat ">
+                    <ul class="media-list " style="height: 64px; overflow-y: scroll" id="chatbox-listMessages">
+
+                    </ul>
+                </div>
+                <div class="panel-footer">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Enter Message...." id="userMessage">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-primary" onclick="sendMessage()">Send</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    {{!-- <div class=" pb-1" >
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Input</h4>
+                <textarea id = "code-input">
+
+                </textarea>
+                <br>
+                <button class="btn btn-dark" onclick="compileandrun()">compile and run</button>
+
+            </div>
+
+            <div class="col-md-6">
+                <h4>Output</h4>
+                 <textarea id = "code-output">
+
+                </textarea> 
+                <span id = "code-output">
+
+                </span>
+            </div>
+        </div> --}}
+        <div class="alert alert-danger" >
+           <span id = "error"></span>
+        </div>
+
+    </div> 
+   
+
+
+</div>
+
+
+
+<input type="hidden" value="{{roomID}}" id="roomID">
+<input type="hidden" value="{{user.name}}" id="user" >
+
+
+
+
+
+<script>
+    var EditorClient = ot.EditorClient;
+    var SocketIOAdapter = ot.SocketIOAdapter;
+    var CodeMirrorAdapter = ot.CodeMirrorAdapter;
+
+    var socket = io.connect('http://localhost:3000/');
+
+
+    var editor = CodeMirror.fromTextArea(document.getElementById("code-screen"), {
+        lineNumbers: true,
+        mode: "text/x-c++src",
+        theme: "material-palenight"
+        
+    });
+
+    var code = $('#code-screen').val();
+    console.log(code);
+
+
+    var cmClient;
+    function init(str, revision, clients, serverAdapter) {
+        if (!code) {
+            editor.setValue(str);
+        }
+
+        cmClient = window.cmClient = new EditorClient(revision, clients, serverAdapter, new CodeMirrorAdapter(editor))
+    }
+
+    socket.on('doc', function (obj) {
+        init(obj.str, obj.revision, obj.clients, new SocketIOAdapter(socket));
+    });
+
+    var username = $("#user").val().toString();
+    
+    console.log(username);
+    if (username === '') {
+        var userId = Math.floor(Math.random() * 9999).toString();
+        username = "User" + userId;
+        $("#chatbox-username").text(username);
+    }
+
+    var roomID = $('#roomID').val();
+    socket.emit('joinRoom', { room: roomID, username: username });
+
+    var userMessage = function (name, text) {
+        return ('<li class="media" ><div class="media-body"> <div class="media">'
+            + '<div class="media-body">' + '<b>' + name + '</b> : ' + text + '<hr/> </div></div></div> </li>'
+        );
+    };
+
+    var compileandrun = function(){
+
+        var code = $('#code-screen').val();
+        var input = $('#code-input').val();
+        console.log(code);
+        var pathname = window.location.pathname; // Returns path only (/path/example.html
+         $.ajax({
+                    url: pathname,
+                    type: 'POST',
+                    cache: false,
+                    data: { code : code, input: input },
+                    success: function (data) 
+                    {
+                        if(data.error!=='')
+                        {
+                            console.log("printing error");
+                            $('#error').html(data.error);
+                        }
+                        else
+                        {
+                            $('#cose-output').html(data.output);
+                            $("#code-output").css({ "visiblity": "visible" });
+
+                        }
+
+                        console.log(data);
+                    },
+                    timeout : 5000
+                    {{!-- , error: function (jqXHR, textStatus, err) {
+                        alert('text status ' + textStatus + ', err ' + err)
+                    } --}}
+                });
+                       
+
+    }
+
+    var sendMessage = function () {
+        var userMessage = $('#userMessage').val();
+        socket.emit('chatMessage', { message: userMessage, username: username });
+        $('#userMessage').val("");
+    };
+
+    socket.on('chatMessage', function (data) {
+        $('#chatbox-listMessages').append(userMessage(data.username, data.message));
+    })
+</script>
