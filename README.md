@@ -5,7 +5,7 @@ Collab with your friends, colleagues and code together in realtime!.
 You can use it to conduct interviews, help your friend debug some code, explaining the working of a code and much more. Basically it makes learning programming together much easy and fun!.
 
 For implementing the concurrent edits and realtime colaboration I have used `Operational Transformations` and `socket.io` for chatting and syncing the code file.
-![](result.gif)
+![](result2.gif)
 
 For any `suggesstions` , `issues` and `collaborations` write to me at [pawan.kholiya01@gmail.com](mailto:pawan.kholiya01@gmail.com) . I will be more than happy to hear from you.
 
