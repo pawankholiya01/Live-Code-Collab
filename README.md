@@ -36,7 +36,7 @@ For any `suggesstions` , `issues` and `collaborations` write to me at [pawan.kho
   - Download the project as zip;
   - Navigate to `app.js` and change:
     - `const sessionKey` to a random string as per-your choice;
-    - `const dbConnstring` to your cluster connection url which you canget by creating cluster on Atlas, Alternatively you can also use mongoDB loca
+    - `const dbConnstring` to your cluster connection url which you can get by creating cluster on Atlas, Alternatively you can also use mongoDB local.
   - Install all dependencies by
     ``` npm install ```
   - Start the Server by
