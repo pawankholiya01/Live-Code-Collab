@@ -42,5 +42,4 @@ For any `suggesstions` , `issues` and `collaborations` write to me at [pawan.kho
   - Start the Server by
     ``` npm start ```
     
-    ![](https://komarev.com/ghpvc/?username=pawankholiya01&color=blue)
   
